@@ -1,0 +1,22 @@
+.input-advice {
+  color: #d4be91;
+  background: #3a301d66;
+  border-left: 2px solid #ad8847;
+  padding: 10px 12px;
+  font-size: 10px;
+  line-height: 1.7;
+}
+.depth-notice {
+  padding: 17px 22px;
+  color: #e9c692;
+  background: #392c1e;
+  border-top: 1px solid #6b5030;
+}
+.depth-notice strong { font-size: 12px; font-weight: 600; }
+.depth-notice p { font-size: 11px; margin: 7px 0 0; line-height: 1.8; }
+.depth-notice .text-button { color: #e9c692; text-decoration: underline; text-underline-offset: 4px; }
+#volume-help { background: #2c3624; border: 1px solid #536640; border-radius: 7px; padding: 14px; margin: 18px 0; }
+#volume-help h3 { font-size: 14px; font-weight: 500; margin: 0 0 10px; }
+#volume-help p { margin: 8px 0; }
+#camera-angle { width: 94px; padding: 7px 4px; font-size: 10px; background: #1c2518; }
+.viewer-toolbar { flex-wrap: wrap; max-width: calc(100% - 75px); justify-content: center; }

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#121414">
+  <title>Gen STL — De la imagen al objeto</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%23c1f777'/%3E%3Cpath d='m20 8 12 7v13l-12 7-12-7V15Zm0 0v14m12-7-12 7-12-7m12 7v13' stroke='%23121414' stroke-width='2' fill='none'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/static/styles.css"><link rel="stylesheet" href="/static/volume.css">
+  <script type="importmap">{"imports":{"three":"/three/build/three.module.js","three/addons/":"/three/examples/jsm/"}}</script>
+  <script type="module" src="/static/app.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/" aria-label="Gen STL inicio"><span class="brand-mark">◇</span><strong>GEN<span>STL</span></strong><span class="version">STUDIO / 01</span></a>
+  <nav aria-label="Navegación"><button class="nav-button active" id="studio-tab">Estudio</button><button class="nav-button" id="history-tab">Mis modelos <span id="history-count">0</span></button></nav>
+  <span class="local-badge"><i></i> EN TU EQUIPO</span>
+</header>
+<main id="studio">
+  <div class="page-heading"><div><div class="eyebrow">IMAGEN → GEOMETRÍA → OBJETO</div><h1>Dale otra dimensión.</h1><p>Convierte tus referencias en modelos 3D. De principio a archivo.</p></div><button class="text-button" id="help-button">Cómo funciona <span>↗</span></button></div>
+  <div class="workspace">
+    <aside class="input-panel panel">
+      <div class="section-title"><span class="step">01</span><h2>Tus referencias</h2><span class="small-label">1–4 IMÁGENES</span></div>
+      <p class="panel-description">Un objeto, desde distintos ángulos.</p>
+      <label class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Seleccionar imágenes">
+        <input id="images" type="file" accept="image/png,image/jpeg,image/webp" multiple hidden>
+        <span class="upload-icon">↥</span><strong>Arrastra tus imágenes aquí</strong><span>o <u>explora tus archivos</u></span><small>PNG, JPG, WebP · máx. 15 MB · 64–4096 px</small>
+      </label>
+      <div id="image-list" class="image-list"></div>
+      <p id="single-view-note" class="input-advice" hidden>¿Es un dibujo frontal? Puede interpretarse como una lámina. Para una figura, usa un render 3D en tres cuartos o agrega vistas coherentes del mismo personaje.</p>
+      <div class="reference-note"><span>↳</span><p>Usa un fondo limpio y el objeto completo. Para varias imágenes, asigna una vista distinta a cada una.</p></div>
+      <div class="divider"></div>
+      <div class="section-title"><span class="step">02</span><h2>Configura el modelo</h2></div>
+      <form id="generation-form">
+        <label class="field-label" for="model-name">Nombre del proyecto</label><input id="model-name" type="text" maxlength="80" placeholder="Mi próximo objeto" value="Mi modelo">
+        <div class="label-row"><label class="field-label">Calidad de geometría</label><span class="tag">6 GB GPU</span></div>
+        <div class="segmented" role="group" aria-label="Calidad"><button type="button" data-quality="draft" class="selected">Borrador</button><button type="button" data-quality="standard">Estándar</button><button type="button" data-quality="high">Alta</button></div>
+        <p class="field-hint" id="quality-hint">128³ · Menor uso de memoria. Ideal para una primera prueba.</p>
+        <div class="form-grid"><div><label class="field-label" for="size">Lado mayor <span>(mm)</span></label><input id="size" type="number" min="5" max="1000" value="100" required></div><div><label class="field-label" for="seed">Semilla <button type="button" id="random-seed" class="tiny-button" title="Generar semilla aleatoria" aria-label="Generar semilla aleatoria">⤨</button></label><input id="seed" type="number" min="0" max="2147483647" value="12345" required></div></div>
+        <label class="switch-row" for="remove-background"><div><strong>Quitar fondo</strong><small>Aísla el objeto antes de generar</small></div><input id="remove-background" type="checkbox" checked role="switch"></label>
+        <button id="generate" type="submit" class="primary-button" disabled>Generar modelo <span>↗</span></button>
+        <p class="privacy-note">Procesamiento local · Tus imágenes se quedan aquí</p>
+      </form>
+    </aside>
+    <section class="viewer-panel panel" aria-label="Visor del modelo 3D">
+      <div class="viewer-topbar"><div><i class="status-dot" id="viewer-dot"></i><span id="viewer-title">Espacio de trabajo</span></div><span class="viewer-mode">PERSPECTIVA / 3D</span></div>
+      <div id="viewport">
+        <div class="viewport-corner top-left"></div><div class="viewport-corner bottom-right"></div>
+        <div class="empty-state" id="empty-state"><div class="empty-cube"><svg viewBox="0 0 200 210" fill="none" aria-hidden="true"><path d="m100 15 76 44v88l-76 44-76-44V59Z"/><path d="m24 59 76 44 76-44M100 103v88M100 15v88M24 147l76-44 76 44"/><path d="m62 37 76 44v88M138 37 62 81v88M24 103l76 44 76-44" class="cube-inner"/></svg></div><span class="eyebrow">LA SIGUIENTE DIMENSIÓN TE ESPERA</span><h3>Tu idea, en tres dimensiones.</h3><p>Carga una imagen y genera tu primer modelo.<br>Podrás girarlo, inspeccionarlo y exportarlo aquí.</p><span class="empty-tag">GEOMETRÍA SIN TEXTURAS</span></div>
+        <div class="progress-overlay" id="progress-overlay" hidden><div class="spinner"></div><h3 id="progress-title">Preparando tu modelo</h3><p id="progress-stage" aria-live="polite">Iniciando…</p><div class="progress-track"><div id="progress-bar"></div></div><div class="progress-meta"><span id="progress-percent">0%</span><span id="progress-time">00:00</span></div><p class="progress-note">La primera ejecución descarga los pesos de IA.<br>La duración depende de la GPU y de la calidad seleccionada.</p><button id="cancel" class="text-button">Cancelar generación</button></div>
+        <div id="viewer-error" class="viewer-error" hidden></div>
+        <div class="axis-label" aria-hidden="true"><span class="axis-y">Y ↑</span><span class="axis-x">X →</span><span class="axis-z">Z ↙</span></div>
+        <div class="viewer-toolbar" id="viewer-toolbar" hidden><select id="camera-angle" aria-label="Ángulo de vista"><option value="perspective">Perspectiva</option><option value="front">Frente</option><option value="side">Costado</option><option value="back">Atrás</option></select><button id="reset-camera" title="Centrar modelo">◎ <span>Centrar</span></button><button id="wireframe" aria-pressed="false">▧ <span>Malla</span></button><button id="auto-rotate" aria-pressed="true">⟳ <span>Girar</span></button><span class="toolbar-divider"></span><label class="color-control" title="Color de visualización"><input id="model-color" type="color" value="#c1f777" aria-label="Color del modelo"></label></div>
+      </div>
+      <div class="viewer-bottom"><span><i></i> <span id="model-status">SIN MODELO</span></span><span id="viewer-hint">Arrastra para orbitar · Rueda para acercar</span></div>
+      <div id="model-stats" class="model-stats" hidden></div>
+      <div id="depth-notice" class="depth-notice" role="status" hidden><strong>Resultado con poca profundidad</strong><p id="depth-notice-text"></p><button id="depth-help" class="text-button">Cómo preparar una referencia con volumen ↗</button></div>
+      <div class="export-panel"><div class="export-title"><span class="step">03</span><div><h2>Llévalo a tu mundo</h2><p id="export-description">Elige el formato que necesitas.</p></div></div><div class="export-controls"><select id="format" aria-label="Formato de exportación"><option value="stl">STL · Impresión 3D</option><option value="obj">OBJ · Modelado</option><option value="glb">GLB · Web y visores</option><option value="ply">PLY · Malla poligonal</option></select><button id="download" class="download-button" disabled>Descargar <span>↓</span></button></div></div>
+    </section>
+  </div>
+  <div class="system-strip"><span class="system-icon">▣</span><span id="system-status">Comprobando motor local…</span><span class="system-engine" id="system-engine">Hunyuan3D · Mini Turbo</span></div>
+</main>
+<main id="history" hidden><div class="page-heading"><div><div class="eyebrow">TU BIBLIOTECA LOCAL</div><h1>De ideas a objetos.</h1><p>Referencias, resultados y archivos guardados en tu equipo.</p></div><button id="new-model" class="primary-button">Nuevo modelo ↗</button></div><div id="history-grid" class="history-grid"></div></main>
+<footer><span>GEN STL <span class="footer-slash">/</span> DE LA IMAGEN AL OBJETO</span><span>App independiente · Motor Hunyuan3D de Tencent</span></footer>
+<div id="toast" class="toast" role="status" hidden></div>
+<dialog id="help-dialog"><button class="dialog-close" aria-label="Cerrar">×</button><div class="eyebrow">ANTES DE GENERAR</div><h2>Un buen modelo empieza<br>con una buena referencia.</h2><ol><li><strong>Fotografía un solo objeto.</strong> Completo, enfocado y sin obstrucciones. PNG transparente funciona especialmente bien.</li><li><strong>Asigna los ángulos.</strong> Una imagen frontal usa Mini Turbo. De 2 a 4 fotos del mismo objeto usan el modelo multivista: frontal, izquierda, trasera y derecha.</li><li><strong>Empieza con Borrador.</strong> Tu RTX de 6 GB tiene memoria limitada. Multivista y Alta pueden requerir más recursos; cierra aplicaciones que usen la GPU.</li><li><strong>Elige la escala y exporta.</strong> STL, OBJ y PLY usan mm y eje Z vertical. GLB usa metros y eje Y vertical. STL no almacena unidades ni colores.</li></ol><section id="volume-help"><h3>De dibujo plano a figura con volumen</h3><p>Una ilustración frontal con contornos y colores planos puede ser interpretada como una lámina. Más resolución no garantiza más profundidad.</p><p>Primero prepara con una IA de imágenes un render del mismo personaje como figura de resina en vista de tres cuartos: cabeza y cuerpo redondeados, hocico saliente, laterales visibles y fondo limpio. Después carga ese render en este estudio.</p><p>Para más control, prepara vistas frontal, lateral y trasera de la misma figura, con proporciones y detalles consistentes. No dupliques ni espejes la imagen frontal para fingir otros ángulos.</p><p>Los lados ocultos son inventados: revisa la identidad del personaje y las proporciones. La preparación de imágenes se realiza por separado; esta app local todavía no genera vistas nuevas automáticamente.</p></section><p>La IA estima las partes que no se ven: no es un escáner dimensional. La limpieza intenta cerrar agujeros pequeños; revisa la malla en tu laminador antes de imprimir.</p><p>Esta app genera geometría sin texturas. La primera ejecución necesita internet para descargar los modelos; después puede usar los archivos locales. No está afiliada ni respaldada por Tencent.</p><a href="https://github.com/Tencent-Hunyuan/Hunyuan3D-2/blob/main/LICENSE" target="_blank" rel="noreferrer">Licencia del motor Hunyuan3D ↗</a></dialog>
+</body></html>

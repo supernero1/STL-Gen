@@ -1,0 +1,8 @@
+{
+  "name": "gen-stl-studio",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Visor local de Gen STL",
+  "dependencies": { "three": "0.180.0" }
+}
